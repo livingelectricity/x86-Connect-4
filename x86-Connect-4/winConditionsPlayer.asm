@@ -45,19 +45,19 @@ _winConditionHorizontalPlayer:
 		je _notRowHorizontal
 		cmp ecx, 2
 		jne _loopHorizontal
-		cmp byte ptr [connect4Matrix + eax], 0 ;check right
+		cmp byte ptr [connect4Matrix + eax], 0 ;check right for empty slot
 		je _addHorizontalWinRight
 		cmp ebx, 3
 		jl _loopHorizontal
-		cmp byte ptr [connect4Matrix + eax - 3], 0
+		cmp byte ptr [connect4Matrix + eax - 3], 0 ;check left for empty slot
 		jne _loopHorizontal
-		mov byte ptr [playerWinChance], 3
+		mov byte ptr [playerWinChance], 3 ;if high player win chance and empty slot left, update playerWinMove for opponent block
 		sub eax, edi
 		mov dword ptr [playerWinMove], eax
 		add eax, edi
 		jmp _loopHorizontal
 		_addHorizontalWinRight:
-		mov byte ptr [playerWinChance], 3
+		mov byte ptr [playerWinChance], 3 ;if high player win chance and empty slot right, update playerWinMove for opponent block
 		mov dword ptr [playerWinMove], eax
 		jmp _loopHorizontal
 		
@@ -109,7 +109,7 @@ _winConditionVerticalPlayer:
 		jne _columnLoopVertical
 		cmp byte ptr [connect4Matrix + eax], 0
 		jne _columnLoopVertical
-		mov byte ptr [playerWinChance], 3
+		mov byte ptr [playerWinChance], 3 ;if high player win chance and empty slot vertical, update playerWinMove for opponent block
 		mov dword ptr [playerWinMove], eax
 		jmp _columnLoopVertical
 		_incColumn:

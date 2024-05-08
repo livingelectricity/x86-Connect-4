@@ -40,7 +40,7 @@ _noWinOpponent:
 		mov eax, dword ptr [playerWinMove]
 		cmp byte ptr [connect4Matrix + eax - 7], 0 ;if position below ideal player move is empty, no switch opponent move as player piece will not win
 		je _regularOpponentMove
-		cmp byte ptr [playerWinChance], 3 ;if next player move wins, change opponent move to stop player win
+		cmp byte ptr [playerWinChance], 3 ;if next player move is considered a winning move, change opponent move to stop player win
 		je _stopPlayerWin
 		_regularOpponentMove:
 		mov eax, dword ptr [opponentNextMove] ;nextMove variables moved into registers for manipulation, and graphics updated for opponent move
