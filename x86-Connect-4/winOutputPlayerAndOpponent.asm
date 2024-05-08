@@ -24,6 +24,9 @@ extern opponentRowOutput:dword
 extern opponentNextMove:dword
 extern opponentWinWeight:dword
 
+extern playerWinChance:byte
+extern playerWinMove:dword
+
 extern connect4GraphicsLine2:word
 
 .code
@@ -32,12 +35,30 @@ noWinOpponent PROC near
 _noWinOpponent:
 		
 		;opponent no win function
-
+		xor edx, edx
+		mov ebx, 7
+		mov eax, dword ptr [playerWinMove]
+		cmp byte ptr [connect4Matrix + eax - 7], 0 ;if position below ideal player move is empty, no switch opponent move as player piece will not win
+		je _regularOpponentMove
+		cmp byte ptr [playerWinChance], 3 ;if next player move wins, change opponent move to stop player win
+		je _stopPlayerWin
+		_regularOpponentMove:
 		mov eax, dword ptr [opponentNextMove] ;nextMove variables moved into registers for manipulation, and graphics updated for opponent move
 		mov byte ptr [connect4Matrix + eax], 2
-		mov edx, dword ptr [opponentRowOutput]
-		imul edx, 7 ;for matrix row offset
+		div ebx
+		mov [opponentRowOutput], eax
+		mul ebx 
+		mov edx, eax ;for matrix row offset
 		mov eax, 2 ;for connect4GraphicsLine2 (two bytes)
+		jmp _resumeNoWinOpponent
+		_stopPlayerWin:
+		mov byte ptr [connect4Matrix + eax], 2
+		div ebx ;divide eax by 7 for row in eax (remainder discarded)
+		mov [opponentRowOutput], eax  ;for row graphic positioning
+		mul ebx ;multiply eax by 7 for beginning column of row
+		mov edx, eax ;opponent row output for graphics loop
+		mov eax, 2
+		_resumeNoWinOpponent:
 
 		_graphicsLoopOpponent:
 		cmp byte ptr [connect4Matrix + edx], 0
@@ -90,11 +111,14 @@ yesWinOpponent PROC near
 _yesWinOpponent:
 
 		;opponent yes win function
-
+		xor edx, edx
+		mov ebx, 7
 		mov eax, dword ptr [opponentNextMove] ;nextMove variables moved into registers for manipulation, and graphics updated for opponent move
 		mov byte ptr [connect4Matrix + eax], 2
-		mov edx, dword ptr [opponentRowOutput]
-		imul edx, 7 ;for matrix row offset
+		div ebx
+		mov [opponentRowOutput], eax
+		mul ebx 
+		mov edx, eax ;for matrix row offset
 		mov eax, 2 ;for connect4GraphicsLine2 (two bytes)
 
 		_graphicsLoopOpponentYesWin:

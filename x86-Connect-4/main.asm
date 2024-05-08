@@ -80,6 +80,12 @@ invalidInputFlag DB 0
 
 public playerColumnEntry
 playerColumnEntry DB 0
+public playerWinChance
+playerWinChance DB 0
+public playerWinMove
+playerWinMove DD 0
+;public playerWinDirection
+;playerWinDirection DD 0
 
 public winVariable
 winVariable DB 0
@@ -90,7 +96,8 @@ public opponentWinWeight
 opponentWinWeight DD 0
 public opponentRowOutput
 opponentRowOutput DD 0
-
+public randomOpponentValue
+randomOpponentValue DD 0
 opponentInitialMove DB 0
 
 numCharsToClear DD 30
@@ -347,6 +354,9 @@ _main:
 
 		call updatePlayerCircleGraphics ;function to update graphics for player piece, function within playerCircle.asm
 
+		mov byte ptr [playerWinChance], 0
+		mov dword ptr [playerWinMove], 0
+
 		call winConditionHorizontalPlayer ;functions to check if player piece has won game
 		cmp yesWinPlayerFlag, 1
 		je _yesWinPlayer
@@ -374,9 +384,10 @@ _main:
 		cmp byte ptr [opponentInitialMove], 1 ;function for initial move of opponent
 		je _skipInitialMoveOpponent
 		inc byte ptr [opponentInitialMove] ;once opponentInitialMove variable triggered, initial opponent move function no longer activates
+		xor edx, edx
 		mov ebx, 7
 		_verifyRandGenerated:
-		rdseed eax
+		rdrand eax
 		jnc _verifyRandGenerated
 		div ebx
 		cmp byte ptr[connect4Matrix + edx], 0 ;if connect4Matrix at offset not full
@@ -425,7 +436,6 @@ _main:
 		jmp _playerInputLoop ;function to loop for player input if no winner
 
 		_yesWinOpponent:
-		cmp winVariable, 2
 		call yesWinOpponent ;function to call if yes win opponent
 		jmp _playAgainLoop
 

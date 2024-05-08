@@ -1,4 +1,4 @@
-.386P
+.686P
 
 .model flat
 
@@ -12,6 +12,7 @@ extern winVariable:byte
 extern opponentRowOutput:dword
 extern opponentNextMove:dword
 extern opponentWinWeight:dword
+extern randomOpponentValue:dword
 
 .code ;functions below check for opponent win condition (4 in a row) and are similar to player win condition check functions, with some extra features
 ;instead of only checking if win condition has been met, the win points act as weight to determine optimal move for opponent
@@ -69,8 +70,15 @@ winConditionHorizontalRightOpponent ENDP
 winConditionHorizontalLeftOpponent PROC near
 _winConditionHorizontalLeftOpponent:
 		
-		
 		;horizontal left win condition opponent
+		xor edx, edx
+		mov ebx, 2
+		_verifyRandOpponentValueGenerated:
+		rdrand eax
+		jnc _verifyRandOpponentValueGenerated
+		div ebx
+		mov dword ptr [randomOpponentValue], edx
+
 		xor edx, edx 
 		xor ebx, ebx
 		mov eax, 6
@@ -105,10 +113,16 @@ _winConditionHorizontalLeftOpponent:
 		inc ecx
 		cmp ebx, 7
 		je _notRowHorizontalLeftOpponent
-		cmp ecx, dword ptr [opponentWinWeight]
-		jl _loopHorizontalLeftOpponent 
 		cmp byte ptr [connect4Matrix + eax], 0
 		jne _loopHorizontalLeftOpponent
+		cmp ecx, dword ptr [opponentWinWeight]
+		jl _loopHorizontalLeftOpponent
+		jg _updateNextMoveLeftHorizontalOpponent
+		cmp [opponentWinWeight], 0
+		je _updateNextMoveLeftHorizontalOpponent
+		cmp [randomOpponentValue], 0
+		je _loopHorizontalLeftOpponent
+		_updateNextMoveLeftHorizontalOpponent:
 		mov dword ptr [opponentRowOutput], edx
 		mov dword ptr [opponentNextMove], eax
 		mov dword ptr [opponentWinWeight], ecx
@@ -122,8 +136,15 @@ winConditionHorizontalLeftOpponent ENDP
 winConditionVerticalOpponent PROC near
 _winConditionVerticalOpponent:
 		
-		
 		;vertical win condition opponent
+		xor edx, edx
+		mov ebx, 2
+		_verifyRandOpponentValueGenerated:
+		rdrand eax
+		jnc _verifyRandOpponentValueGenerated
+		div ebx
+		mov dword ptr [randomOpponentValue], edx
+
 		xor eax, eax
 		xor ebx, ebx ;win points
 		mov ecx, 7
@@ -156,6 +177,12 @@ _winConditionVerticalOpponent:
 		jne _noIdealMoveVerticalOpponent
 		cmp ebx, dword ptr [opponentWinWeight]
 		jl _noIdealMoveVerticalOpponent
+		jg _updateNextMoveVerticalOpponent
+		cmp [opponentWinWeight], 0
+		je _updateNextMoveVerticalOpponent
+		cmp [randomOpponentValue], 0
+		je _noIdealMoveVerticalOpponent
+		_updateNextMoveVerticalOpponent:
 		mov dword ptr [opponentRowOutput], edi
 		mov dword ptr [opponentNextMove], eax
 		mov dword ptr [opponentWinWeight], ebx
@@ -177,6 +204,14 @@ winConditionDiagonalUpColumnOpponent PROC near
 _winConditionDiagonalUpColumnOpponent:
 		
 		;diagonal up column win condition opponent
+		xor edx, edx
+		mov ebx, 2
+		_verifyRandOpponentValueGenerated:
+		rdrand eax
+		jnc _verifyRandOpponentValueGenerated
+		div ebx
+		mov dword ptr [randomOpponentValue], edx
+
 		xor eax, eax ;matrix position
 		mov ebx, 6   ;total diagonal moves needed to stop trigger
 		xor ecx, ecx ;diagonal move counter
@@ -206,10 +241,16 @@ _winConditionDiagonalUpColumnOpponent:
 		inc ecx
 		cmp ecx, ebx
 		jg _incDiagonalUpColumnOpponent
-		cmp edx, dword ptr [opponentWinWeight]
-		jl _loopDiagonalUpColumnOpponent
 		cmp byte ptr [connect4Matrix + eax], 0
 		jne _loopDiagonalUpColumnOpponent
+		cmp edx, dword ptr [opponentWinWeight]
+		jl _loopDiagonalUpColumnOpponent
+		jg _updateNextMoveUpColumnOpponent
+		cmp [opponentWinWeight], 0
+		je _updateNextMoveUpColumnOpponent
+		cmp [randomOpponentValue], 0
+		je _loopDiagonalUpColumnOpponent
+		_updateNextMoveUpColumnOpponent:
 		mov dword ptr [opponentNextMove], eax
 		mov dword ptr [opponentRowOutput], ecx
 		mov dword ptr [opponentWinWeight], edx
@@ -224,6 +265,14 @@ winConditionDiagonalUpRowOpponent PROC near
 _winConditionDiagonalUpRowOpponent:
 		
 		;diagonal up row win condition opponent
+		xor edx, edx
+		mov ebx, 2
+		_verifyRandOpponentValueGenerated:
+		rdrand eax
+		jnc _verifyRandOpponentValueGenerated
+		div ebx
+		mov dword ptr [randomOpponentValue], edx
+
 		xor eax, eax
 		mov ebx, 6
 		xor ecx, ecx ;row
@@ -253,10 +302,16 @@ _winConditionDiagonalUpRowOpponent:
 		inc ecx
 		cmp ecx, ebx
 		jg _incDiagonalUpRowOpponent
-		cmp edx, dword ptr [opponentWinWeight]
-		jl _loopDiagonalUpRowOpponent
 		cmp byte ptr [connect4Matrix + eax], 0
 		jne _loopDiagonalUpRowOpponent
+		cmp edx, dword ptr [opponentWinWeight]
+		jl _loopDiagonalUpRowOpponent
+		jg _updateNextMoveUpRowOpponent
+		cmp [opponentWinWeight], 0
+		je _updateNextMoveUpRowOpponent
+		cmp [randomOpponentValue], 0
+		je _loopDiagonalUpRowOpponent
+		_updateNextMoveUpRowOpponent:
 		mov dword ptr [opponentNextMove], eax
 		mov dword ptr [opponentRowOutput], ecx
 		mov dword ptr [opponentWinWeight], edx
@@ -271,6 +326,14 @@ winConditionDiagonalDownColumnOpponent PROC near
 _winConditionDiagonalDownColumnOpponent:
 		
 		;diagonal down column win condition opponent
+		xor edx, edx
+		mov ebx, 2
+		_verifyRandOpponentValueGenerated:
+		rdrand eax
+		jnc _verifyRandOpponentValueGenerated
+		div ebx
+		mov dword ptr [randomOpponentValue], edx
+
 		mov eax, 42
 		mov ebx, 6
 		xor ecx, ecx
@@ -302,10 +365,16 @@ _winConditionDiagonalDownColumnOpponent:
 		inc ecx
 		cmp ecx, ebx
 		jg _incDiagonalDownColumnOpponent
-		cmp edx, dword ptr [opponentWinWeight]
-		jl _loopDiagonalDownColumnOpponent
 		cmp byte ptr [connect4Matrix + eax], 0
 		jne _loopDiagonalDownColumnOpponent
+		cmp edx, dword ptr [opponentWinWeight]
+		jl _loopDiagonalDownColumnOpponent
+		jg _updateNextMoveDownColumnOpponent
+		cmp [opponentWinWeight], 0
+		je _updateNextMoveDownColumnOpponent
+		cmp [randomOpponentValue], 0
+		je _loopDiagonalDownColumnOpponent
+		_updateNextMoveDownColumnOpponent:
 		mov dword ptr [opponentNextMove], eax
 		mov edi, 7
 		sub edi, ecx
@@ -322,6 +391,14 @@ winConditionDiagonalDownRowOpponent PROC near
 _winConditionDiagonalDownRowOpponent:
 		
 		;diagonal down row win condition opponent
+		xor edx, edx
+		mov ebx, 2
+		_verifyRandOpponentValueGenerated:
+		rdrand eax
+		jnc _verifyRandOpponentValueGenerated
+		div ebx
+		mov dword ptr [randomOpponentValue], edx
+
 		mov eax, 42
 		mov ebx, 6
 		xor ecx, ecx
@@ -353,10 +430,16 @@ _winConditionDiagonalDownRowOpponent:
 		inc ecx
 		cmp ecx, ebx
 		jg _incDiagonalDownRowOpponent
-		cmp edx, dword ptr [opponentWinWeight]
-		jl _loopDiagonalDownRowOpponent
 		cmp byte ptr [connect4Matrix + eax], 0
 		jne _loopDiagonalDownRowOpponent
+		cmp edx, dword ptr [opponentWinWeight]
+		jl _loopDiagonalDownRowOpponent
+		jg _updateNextMoveDownRowOpponent
+		cmp [opponentWinWeight], 0
+		je _updateNextMoveDownRowOpponent
+		cmp [randomOpponentValue], 0
+		je _loopDiagonalDownRowOpponent
+		_updateNextMoveDownRowOpponent:
 		mov dword ptr [opponentNextMove], eax
 		mov edi, 7
 		sub edi, ecx

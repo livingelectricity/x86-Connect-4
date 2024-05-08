@@ -4,6 +4,8 @@
 
 extern connect4Matrix:byte
 extern yesWinPlayerFlag:byte
+extern playerWinChance:byte
+extern playerWinMove:dword
 
 .code ;all functions below check if player win condition is met (4 in a row), using the values entered into connect4Matrix by dropPlayerCircle function
 
@@ -15,6 +17,7 @@ _winConditionHorizontalPlayer:
 		xor ebx, ebx ;column counter
 		xor eax, eax ;matrix position
 		xor ecx, ecx ;win points
+		mov edi, 3
 	
 		_loopHorizontal:
 		cmp byte ptr [connect4Matrix + eax], 1 ;check if matrix position contains player value
@@ -40,6 +43,22 @@ _winConditionHorizontalPlayer:
 		inc ebx
 		cmp ebx, 7
 		je _notRowHorizontal
+		cmp ecx, 2
+		jne _loopHorizontal
+		cmp byte ptr [connect4Matrix + eax], 0 ;check right
+		je _addHorizontalWinRight
+		cmp ebx, 3
+		jl _loopHorizontal
+		cmp byte ptr [connect4Matrix + eax - 3], 0
+		jne _loopHorizontal
+		mov byte ptr [playerWinChance], 3
+		sub eax, edi
+		mov dword ptr [playerWinMove], eax
+		add eax, edi
+		jmp _loopHorizontal
+		_addHorizontalWinRight:
+		mov byte ptr [playerWinChance], 3
+		mov dword ptr [playerWinMove], eax
 		jmp _loopHorizontal
 		
 
@@ -85,7 +104,15 @@ _winConditionVerticalPlayer:
 		add eax, 7
 		dec ecx
 		cmp ecx, 0
+		je _incColumn
+		cmp ebx, 3
 		jne _columnLoopVertical
+		cmp byte ptr [connect4Matrix + eax], 0
+		jne _columnLoopVertical
+		mov byte ptr [playerWinChance], 3
+		mov dword ptr [playerWinMove], eax
+		jmp _columnLoopVertical
+		_incColumn:
 		mov ecx, 7
 		inc edx
 		cmp edx, 6
@@ -135,6 +162,12 @@ _winConditionDiagonalUpColumnPlayer:
 		inc ecx
 		cmp ecx, ebx
 		jg _incDiagonalUpColumn
+		cmp edx, 3
+		jne _loopDiagonalUpColumn
+		cmp byte ptr [connect4Matrix + eax], 0
+		jne _loopDiagonalUpColumn
+		mov byte ptr [playerWinChance], 3
+		mov dword ptr [playerWinMove], eax
 		jmp _loopDiagonalUpColumn
 
 		_noWinDiagonalUpColumn:
@@ -182,6 +215,12 @@ _winConditionDiagonalUpRowPlayer:
 		inc ecx
 		cmp ecx, ebx
 		jg _incDiagonalUpRow
+		cmp edx, 3
+		jne _loopDiagonalUpRow
+		cmp byte ptr [connect4Matrix + eax], 0
+		jne _loopDiagonalUpRow
+		mov byte ptr [playerWinChance], 3
+		mov dword ptr [playerWinMove], eax
 		jmp _loopDiagonalUpRow
 
 		_noWinDiagonalUpRow:
@@ -229,6 +268,12 @@ _winConditionDiagonalDownColumnPlayer:
 		inc ecx
 		cmp ecx, ebx
 		jg _incDiagonalDownColumn
+		cmp edx, 3
+		jne _loopDiagonalDownColumn
+		cmp byte ptr [connect4Matrix + eax], 0
+		jne _loopDiagonalDownColumn
+		mov byte ptr [playerWinChance], 3
+		mov dword ptr [playerWinMove], eax
 		jmp _loopDiagonalDownColumn
 
 		_noWinDiagonalDownColumn:
@@ -276,6 +321,12 @@ _winConditionDiagonalDownRowPlayer:
 		inc ecx
 		cmp ecx, ebx
 		jg _incDiagonalDownRow
+		cmp edx, 3
+		jne _loopDiagonalDownRow
+		cmp byte ptr [connect4Matrix + eax], 0
+		jne _loopDiagonalDownRow
+		mov byte ptr [playerWinChance], 3
+		mov dword ptr [playerWinMove], eax
 		jmp _loopDiagonalDownRow
 
 		_noWinDiagonalDownRow:
